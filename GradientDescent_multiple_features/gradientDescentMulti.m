@@ -1,31 +1,56 @@
-function [theta, J_history] = gradientDescentMulti(X, y, theta, alpha, num_iters)
-%GRADIENTDESCENTMULTI Performs gradient descent to learn theta
-%   theta = GRADIENTDESCENTMULTI(x, y, theta, alpha, num_iters) updates theta by
-%   taking num_iters gradient steps with learning rate alpha
+function [theta_grad_descent, theta, J] = gradientDescentMulti(X, y, m)
+  
+  % Prepare for plotting
+  figure;
+  % plot each alpha's data points in a different style
+  % braces indicate a cell, not just a regular array.
+  plotstyle = {'b', 'r', 'g', 'k', 'b--', 'r--'};
 
-% Initialize some useful values
-m = length(y); % number of training examples
-J_history = zeros(num_iters, 1);
+  % Initialize few parameters 
+  alpha = [0.01, 0.03, 0.1, 0.3, 1, 1.3];
+  
+  MAX_ITR = 100;
 
-for iter = 1:num_iters
-    
-    x1 = X(:, 2); % the value of x1
-    
-    x2 = X(:, 3); % the value of x1
-    
-    h  = theta(1) + (theta(2)*x1) + (theta(3)*x2); % calculating hypothesis
-    
-    theta_zero = theta(1) - alpha * (1/m) * sum(h - y); % calculating theta zero
-    
-    theta_one = theta(2) - alpha * (1/m) * sum((h - y).*x1); % calculating theta one
-    
-    theta_two = theta(3) - alpha * (1/m) * sum((h - y).*x2); % calculating theta one
-    
-    theta = [theta_zero; theta_one; theta_two]; % values of theta0, theta1 and theta2
+    % this will contain my final values of theta after I've found the best learning rate
+    theta_grad_descent = zeros(size(X(1,:))); 
 
-    % Save the cost J in every iteration    
-    J_history(iter) = computeCostMulti(X, y, theta);
+    for i = 1:length(alpha)
+  
+        theta = zeros(size(X(1,:)))'; % initialize fitting parameters
+        J = zeros(MAX_ITR, 1);
+    
+        for num_iterations = 1:MAX_ITR
+      
+            J(num_iterations) = computeCostMulti(X, y, theta);
+      
+            % The gradient
+            grad = (1/m) .* X' * ((X * theta) - y);
+        
+            % Here is the actual update
+            theta = theta - alpha(i) .* grad;
+      
+        end
+      % Now plot the first 50 J terms
+        plot(0:49, J(1:50), char(plotstyle(i)), 'LineWidth', 2)
+        hold on
+    
+        % After some trial and error, I find alpha=1
+        % is the best learning rate and converges
+        % before the 100th iteration
+        % so I save the theta for alpha=1 as the result of gradient descent
+        
+        if (alpha(i) == 1)
+            theta_grad_descent = theta;
+        end
+end        
+  legend('0.01','0.03','0.1', '0.3', '1', '1.3')
+  xlabel('Number of iterations')
+  ylabel('Cost J')
 
-end
+% force Matlab to display more than 4 decimal places
+% formatting persists for rest of this session
+format long
 
+% Display gradient descent's result
+% theta_grad_descent
 end
